@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 #
 # Created by Christophe "Tito" De Wolf <tito@webtito.be> twitter.com/tito1337
