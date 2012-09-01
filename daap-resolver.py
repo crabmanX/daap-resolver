@@ -11,6 +11,7 @@ from struct import unpack, pack
 import simplejson as json
 from daap import DAAPClient
 import logging
+import difflib
 
 ###################################################################### config
 DAAP_HOST = "10.0.73.1"
@@ -45,15 +46,19 @@ class DAAPresolver:
 
         self.tracks = self.database.tracks()
         logger.info("Got %s tracks"%len(self.tracks))
-        
+
     def fulltext(self, search):
-        #TODO : more effective search maybe?
-        words = search.split()
-        pattern = '(%s)'%('|'.join(words))
         founds = []
         logger.info('Searching %s in %d tracks'%(search, len(self.tracks)))
+        seqMatch = difflib.SequenceMatcher(None, "foobar", search)
         for t in self.tracks:
-            if len(re.findall(pattern, "%s %s %s"%(t.artist, t.album, t.name))) == len(words):
+            seqMatch.set_seq1(t.artist)
+            score = seqMatch.quick_ratio()
+            seqMatch.set_seq1(t.album)
+            score = max( seqMatch.quick_ratio(),  score )
+            seqMatch.set_seq1(t.name)
+            score = max( seqMatch.quick_ratio(),  score )
+            if score >= 0.3:
                 found = dict()
                 found["artist"] = t.artist
                 found["track"]  = t.name
@@ -61,18 +66,25 @@ class DAAPresolver:
                 if isinstance(t.time, int):
                     found["duration"] = int(t.time/1000)
                 found["url"]    = 'http://%s:%s/databases/%d/items/%d.mp3?session-id=%s'%(self.host, self.port, self.database.id, t.id, self.session.sessionid)
-                found["score"] = 1
+                found["score"] = score
                 #found["source"] = 'DAAP'
                 founds.append(found)
         logger.info('Found %d tracks'%len(founds))
         return founds
-        
+
     def artistandtrack(self, artist, track):
-        #TODO : more effective search maybe?
         founds = []
         logger.info('Searching %s - %s in %d tracks'%(artist, track, len(self.tracks)))
+        seqMatchArtist = difflib.SequenceMatcher(None, "foobar", artist)
+        seqMatchTrack = difflib.SequenceMatcher(None, "foobar", track)
         for t in self.tracks:
-            if re.search("%s"%artist, "%s"%t.artist, re.IGNORECASE ) and re.search("%s"%track, "%s"%t.name, re.IGNORECASE ):
+            seqMatchArtist.set_seq1(t.artist)
+            seqMatchTrack.set_seq1(t.name)
+            scoreArtist = seqMatchArtist.quick_ratio()
+            scoreTrack = seqMatchTrack.quick_ratio()
+            score = (scoreArtist + scoreTrack) /2
+            if score >= 0.85:
+                logger.debug("%s - %s : %s - %s : %f,%f,%s"%(artist, track, t.artist, t.name, scoreArtist, scoreTrack, score))
                 found = dict()
                 found["artist"] = t.artist
                 found["track"]  = t.name
@@ -80,7 +92,7 @@ class DAAPresolver:
                 if isinstance(t.time, int):
                     found["duration"] = int(t.time/1000)
                 found["url"]    = 'http://%s:%s/databases/%d/items/%d.mp3?session-id=%s'%(self.host, self.port, self.database.id, t.id, self.session.sessionid)
-                found["score"] = 1
+                found["score"] = score
                 #found["source"] = 'DAAP'
                 founds.append(found)
         logger.info('Found %d tracks'%len(founds))
