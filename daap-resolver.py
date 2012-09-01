@@ -75,11 +75,11 @@ class DAAPresolver:
     def artistandtrack(self, artist, track):
         founds = []
         logger.info('Searching %s - %s in %d tracks'%(artist, track, len(self.tracks)))
-        seqMatchArtist = difflib.SequenceMatcher(None, "foobar", artist)
-        seqMatchTrack = difflib.SequenceMatcher(None, "foobar", track)
+        seqMatchArtist = difflib.SequenceMatcher(None, "foobar", self.stripFeat(artist))
+        seqMatchTrack = difflib.SequenceMatcher(None, "foobar", self.stripFeat(track))
         for t in self.tracks:
-            seqMatchArtist.set_seq1(t.artist)
-            seqMatchTrack.set_seq1(t.name)
+            seqMatchArtist.set_seq1(self.stripFeat(t.artist))
+            seqMatchTrack.set_seq1(self.stripFeat(t.name))
             scoreArtist = seqMatchArtist.quick_ratio()
             scoreTrack = seqMatchTrack.quick_ratio()
             score = (scoreArtist + scoreTrack) /2
@@ -97,6 +97,15 @@ class DAAPresolver:
                 founds.append(found)
         logger.info('Found %d tracks'%len(founds))
         return founds
+
+
+    def stripFeat(self,  s):
+        patterns = ['^(.*?)\(feat\..*?\).*?$',  '^(.*?)feat\..*?$']
+        for pattern in patterns:
+            reg = re.search(pattern,  s)
+            if reg:
+                s= reg.group(1)
+        return s
 
 
 ###################################################################### functions
