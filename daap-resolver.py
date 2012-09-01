@@ -84,7 +84,7 @@ class DAAPresolver:
             scoreTrack = seqMatchTrack.quick_ratio()
             score = (scoreArtist + scoreTrack) /2
             if score >= 0.85:
-                logger.debug("%s - %s : %s - %s : %f,%f,%s"%(artist, track, t.artist, t.name, scoreArtist, scoreTrack, score))
+                logger.info("%s - %s : %s - %s : %f,%f,%s"%(artist, track, t.artist, t.name, scoreArtist, scoreTrack, score))
                 found = dict()
                 found["artist"] = t.artist
                 found["track"]  = t.name
@@ -92,7 +92,7 @@ class DAAPresolver:
                 if isinstance(t.time, int):
                     found["duration"] = int(t.time/1000)
                 found["url"]    = 'http://%s:%s/databases/%d/items/%d.mp3?session-id=%s'%(self.host, self.port, self.database.id, t.id, self.session.sessionid)
-                found["score"] = score
+                found["score"] = 1 #round(score, 2)
                 #found["source"] = 'DAAP'
                 founds.append(found)
         logger.info('Found %d tracks'%len(founds))
