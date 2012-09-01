@@ -119,8 +119,8 @@ def print_json(o):
 settings = dict()
 settings["_msgtype"] = "settings"
 settings["name"] = "DAAP Resolver"
-settings["targettime"] = 200 # millseconds
-settings["weight"] = 98 # mp3tunes results should be chosen just under the local collection
+settings["targettime"] = 400 # millseconds
+settings["weight"] = 100 # mp3tunes results should be chosen just under the local collection
 print_json( settings )
 
 
