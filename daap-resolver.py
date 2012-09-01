@@ -20,11 +20,11 @@ DAAP_PORT = "3689"
 ###################################################################### logger
 # TODO : disable this when fully tested
 logger = logging.getLogger('daap-resolver')
-hdlr = logging.FileHandler('.daap-resolver.log')
+hdlr = logging.FileHandler('daap-resolver.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.ERROR)
 
 logger.info('Started')
 
@@ -142,7 +142,7 @@ while 1:
                 tracks = resolver.fulltext(request['fulltext'])
             else:
                 tracks = resolver.artistandtrack(request['artist'], request['track'])
-                
+
             if len(tracks) > 0:
                 response = { 'qid':request['qid'], 'results':tracks, '_msgtype':'results' }
                 logger.debug('Sent response : %s'%response)
